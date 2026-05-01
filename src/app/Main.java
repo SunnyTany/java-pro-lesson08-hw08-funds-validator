@@ -8,27 +8,42 @@ public class Main {
         Account myAccount = new Account(1000.00);
         Scanner scanner = new Scanner(System.in);
 
-        System.out.printf("Balance is USD %.2f.%n" +
-                "Enter purchase amount, USD: ", myAccount.getBalance());
+        System.out.println("--- Welcome to ATM System ---");
+        System.out.println("Type 'exit' to finish operations.");
 
-        // 1. Input validation (not a number)
-        if (!scanner.hasNextDouble()) {
-            System.out.println("Error: Invalid input. Please enter a number.");
-            return;
+        while (true) {
+            System.out.printf("%nBalance is USD %.2f.%n" +
+                    "Enter purchase amount, USD: ", myAccount.getBalance());
+
+            String input = scanner.next();
+
+            // Проверка на выход
+            if (input.equalsIgnoreCase("exit")) {
+                System.out.println("Thank you for using our service. Goodbye!");
+                break;
+            }
+
+            try {
+                // Пытаемся преобразовать строку в число
+                double amount = Double.parseDouble(input.replace(",", "."));
+
+                // Выполняем транзакцию (внутри только опасный метод)
+                try {
+                    myAccount.withdraw(amount);
+                } catch (FundsException ex) {
+                    System.out.println(ex.getMessage());
+                    continue; // Возвращаемся к началу цикла
+                }
+
+                // Успешный результат
+                System.out.println("Funds are OK. Purchase paid.");
+
+            } catch (NumberFormatException e) {
+                // Если введено не число и не "exit"
+                System.out.println("Error: Please enter a valid number or 'exit'.");
+            }
         }
 
-        double amount = scanner.nextDouble();
-
-        // 2. In the try block, only the method that throws the exception
-        try {
-            myAccount.withdraw(amount);
-        } catch (FundsException ex) {
-            System.out.println(ex.getMessage());
-            return; // Aborting execution because the transaction failed.
-        }
-
-        // 3. Logic of successful completion
-        System.out.println("Funds are OK. Purchase paid.");
-        System.out.printf("Balance is USD %.2f%n", myAccount.getBalance());
+        scanner.close();
     }
 }
